@@ -128,14 +128,15 @@ def parseBIF(BIF):
 def printNodes(nodes):
     for a in nodes:
         print a.getName()
-        print "Parents: "
+        print "*Parents: "
         for b in a.parents:
             print b.getName()
-        print "CPD: "
+        print "*CPD: "
         print a.getDist()
-        print "Children: "
+        print "*Children: "
         for c in a.children:
             print c.getName()
+        print "marginal",a.marginal
         print ""
 
 '''def printFactors(factors):

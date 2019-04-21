@@ -86,6 +86,7 @@ class Node:
             self.marginal = {}
             for key, value in distribution.iteritems():
                 i=0
+                #print ('key',key)
                 while i<len(value):
                     self.marginal[(key[i],)] = value[i]
                     i+=1
