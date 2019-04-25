@@ -37,6 +37,7 @@ def selectCandidate(nodes,target):
     else: print('te logo')
     return -1
 
+
 def eliminateVariable(nodes, var_elim):
     print('var to elim:', var_elim)
     for i,node in enumerate(nodes):
@@ -104,6 +105,8 @@ def singleVarElim(nodes, var, newFactor):
     # but this is allways needed
     for i,node in enumerate(nodes):
         if node.name == var:
+            print 'dentro: ',node.name
+            print 'LOLOL',nodes[i].name
             var_node = node
             if ( len(var_node.children) > 0 ):
                 marg_probs = []
@@ -119,9 +122,23 @@ def singleVarElim(nodes, var, newFactor):
                 print var_node.name, marg_probs
                 
                 for c in var_node.children:
+                    # get new distributions
                     nodes[nodes.index(c)].dist = calcNewDist(c,var_node,marg_probs)
-                    # falta apagar pai da lista de pais
-                
+                    # elim parent
+                    del c.parents[c.parents.index(var_node)]
+            else:
+                for p in var_node.parents:
+                    c_rm_index = p.children.index(var_node)
+                    del nodes[nodes.index(p)].children[c_rm_index]
+            # now create new factor if needed
+
+            # elim node from tree
+            print 'CARALHO',nodes[i].name
+            
+            del nodes[nodes.index(var_node)]
+
+    return nodes
+
 def calcNewDist(c, p, mp):
     newDist = {}
     p_index = c.parents.index(p)
@@ -133,7 +150,7 @@ def calcNewDist(c, p, mp):
                 new_vals[i] += val[i] * mp[p_state_index]
         #print c.name,new_vals
         newDist[c.getStates()] = tuple(new_vals)
-        print newDist
+        #print newDist
         return newDist
     else:
         new_keys = []
@@ -149,17 +166,12 @@ def calcNewDist(c, p, mp):
                 if i != p_index:
                     new_keys.append(k)
             total_vals.append(new_vals)
-        #entries_size = 1
-        #    print key,val,new_vals
-        #print new_keys, total_vals
-        
+    
         '''valueToGroup = 0
         for i,k in enumerate(new_keys):
             if k == new_keys[0] and i != 0:
                 valueToGroup = i + 1
         '''
-        #print 'nks', new_keys
-        #print 'nvls', total_vals
         checked_keys = []
         for i in range(0,len(new_keys)):
             if ( new_keys[i] not in checked_keys ):
@@ -172,6 +184,7 @@ def calcNewDist(c, p, mp):
                 #print 'fs',final_sums
                 newDist[c.getStates(),tuple([new_keys[i]])] = tuple(final_sums)
         print newDist
+        return newDist
         
         '''for i in range(0,valueToGroup):
             new_sum = [total_vals[i]]    
@@ -181,26 +194,8 @@ def calcNewDist(c, p, mp):
                 new_sum[0][0] += total_vals[j][0]     
                 new_sum[0][1] += total_vals[j][1]
                 j += valueToGroup'''
-            #print 'nk',tuple(c.getStates()) +,tuple([new_keys[i]]))
-            #print 'aiii',new_keys[i]
-            
-            #newDist[c.getStates(),tuple([new_keys[i]])] = tuple(new_sum[0])
-            
-            #print 'nova',newDist
-            #newDist[] = tuple(new_sum)
-
-        '''for p in c.parents:
-            entries_size *= p.numStates
-        final_vals = []*entries_size
-        for i in range(0,entries_size):
-            j = 0
-            while(j < len(total_vals)):
-                j = 999999999
-            #newDist[c.getStates()] = tuple(new_vals)
-        #print c.name,new_vals
-        '''
+    
         
-   
 def getFactorsWithVar(nodes,var):
     varsWithFactors = []
     for node in nodes:
@@ -212,16 +207,47 @@ def getFactorsWithVar(nodes,var):
                 varsWithFactors.append(node.name)
     return varsWithFactors
 
+
+def chooseSmallerFactor(nodes,target):
+    smallerFactor = ''
+    minFactorLen = float('inf')
+    
+    for node in nodes:
+        if(node.name != target):
+            current = getFactorsWithVar(nodes,node.name)
+            if (len(current) < minFactorLen):
+                minFactorLen = len(current)
+                smallerFactor = node.name
+    return smallerFactor
+
+
+def getProbabilityOf(target, nodes):
+    while( len(nodes) > 1 ):
+        for node in nodes:
+            print 'asd?',node.name
+        varToElim = chooseSmallerFactor(nodes,target)
+        print 'toElim',varToElim
+        factorsToElim = getFactorsWithVar(nodes,varToElim)
+        nodes = singleVarElim(nodes, varToElim, factorsToElim)
+        print len(nodes)
+
+    print nodes[0].name,nodes[0].dist
+
 def main():
     # get target from input
-    target = ''
-    nodes = parse('cancer.bif')
+    nodes = parse('asia.bif')
+    print('what var do you wish to know the probability of?')
+    target = input()
+    target = 'either'
     #bp.printNodes(nodes)
+
     # select var to elim using X algo
-    
-    var = 'Pollution'
-    factorsToElim = getFactorsWithVar(nodes,var)
-    singleVarElim(nodes, var, factorsToElim)
+    #var = 'Pollution'
+
+    # good v
+    getProbabilityOf(target,nodes)
+    #factorsToElim = getFactorsWithVar(nodes,var)
+    #singleVarElim(nodes, var, factorsToElim)
     
     #print factorsToElim
     #nodes = eliminateVariable(nodes,'asia')
