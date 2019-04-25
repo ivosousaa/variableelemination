@@ -17,6 +17,8 @@ def selectCandidate(nodes,target):
     minChildren = float('inf')
     minParents = float('inf')
 
+    # CHECK FACTOR SIZES
+
     for i,node in enumerate(nodes):
         if(node.name != target):
             if(len(node.children) == 0):
@@ -95,21 +97,24 @@ def eliminateVariable(nodes, var_elim):
                     #    ve_index = child.parents.index(var_elim)
                     #    print (ve_index)
 
+def getFactorsWithVar(nodes,var):
+    varsWithFactors = []
+    for node in nodes:
+        for p in node.parents:
+            if (p.name == var):
+                varsWithFactors.append(node.name)
+    return varsWithFactors
+
 def main():
     # get target from input
     target = ''
     nodes = parse('asia.bif')
-    #bp.printNodes(nodes)
-    nodes = eliminateVariable(nodes,'asia')
+    bp.printNodes(nodes)
+    # select var to elim using X algo
+    factorsToElim = getFactorsWithVar(nodes,'smoke')
+    print factorsToElim
+    #nodes = eliminateVariable(nodes,'asia')
     #bp.printNodes(nodes)
     
-    #print(nodes[1].dist[('yes', 'no'),('yes',)])
-    #print(nodes[1].dist[('yes', 'no'),('yes',)])
-
-    #print(nodes[1].dist[('yes', 'no')])
-    #print(nodes[1].dist[('yes', 'no'),('yes','yes')])
-
-    #index_rm = selectCandidate(nodes,target)
-    #print('index node to rm: ', nodes[index_rm].name)
     
 main()
